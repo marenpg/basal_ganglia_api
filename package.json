@@ -8,7 +8,7 @@
     "start-dev": "./node_modules/.bin/nodemon --watch src --ext js,graphql --exec babel-node  src/index.js",
     "build": "babel src -d build && shx cp src/schema.graphql build",
     "now-build": "babel src -d build && shx cp .env build && shx cp src/schema.graphql build",
-    "start": "npm run build && node build/index.js",
+    "start": "node build/index.js",
     "git:checkout-master-and-pull": "git checkout master && git pull --rebase",
     "deploy:prod": "npm run git:checkout-master-and-pull && git push heroku master",
     "deploy": "git push heroku master"
