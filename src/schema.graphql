@@ -1,0 +1,602 @@
+### Region information
+
+type BrainRegion {
+  id: ID!
+  name: String
+  abbreviation: String
+
+  partOf: BrainRegion @relation(name: "PART_OF", direction: "OUT")
+  subRegions: [BrainRegion] @relation(name: "PART_OF", direction: "IN")
+  nomenclature: Nomenclature @relation(name: "NAMING", direction: "OUT")
+  specie: Specie @relation(name: "REGION_SPECIE", direction: "OUT")
+  cellsObserved: [CellType] @relation(name: "CELLS_IN_REGION", direction: "OUT")
+  regionMappingsBams: [RegionRelation]
+  regionInputs: [BrainRegion]
+    @cypher(
+      statement: """
+      MATCH (this)<-[:RELATES_TO]-(b:BamsRegion)-[r:CONNECTS_TO]->(c:BamsRegion)-[:RELATES_TO]->(d:BrainRegion)
+      RETURN DISTINCT d ORDER BY d.name
+      """
+    )
+
+  regionOutputs: [BrainRegion]
+    @cypher(
+      statement: """
+      MATCH (this)<-[r1:RELATES_TO]-(b:BamsRegion)<-[r2:CONNECTS_TO]-(c:BamsRegion)-[r3:RELATES_TO]->(d:BrainRegion)
+      RETURN DISTINCT d ORDER BY d.name
+      """
+    )
+
+  analyses: [Experiment]
+    @cypher(
+      statement: """
+      MATCH (this)<-[:PRIMARY_REGION]-(r:RegionRecord)<-[:REGION_RECORD]-(d)<-[:DATA_TYPE]-(a:Analysis)
+      RETURN DISTINCT a ORDER BY a.name
+      """
+    )
+}
+
+type RegionRelation @relation(name: "RELATES_TO") {
+  from: BamsRegion
+  to: BrainRegion
+  relationType: String
+  description: String
+}
+
+type RegionConnection @relation(name: "CONNECTS_TO") {
+  from: BamsRegion
+  to: BamsRegion
+  strength: String
+  technique: String
+  description: String
+  reference: String
+}
+
+type RegionRecord {
+  id: ID!
+  name: String
+  coverage: String
+  specificity: String
+  numberOfOriginalRegions: Int
+  originalRegionRetained: Int
+  parcellationScheme: String
+  atlasCoordinates: String
+  illustration: String
+  semanticDescription: String
+  annotatedImages: String
+  regionalCharacteristics: String
+  isAtlasRegion: String
+  serialSections: String
+  collectorsComment: String
+  documentationScore: Int
+
+  primaryRegion: BrainRegion @relation(name: "PRIMARY_REGION", direction: "OUT")
+  secondaryRegion: BrainRegion
+    @relation(name: "SECONDARY_REGION", direction: "OUT")
+}
+
+type RegionZone {
+  id: ID!
+  name: String
+  ontology: String
+}
+
+type Nomenclature {
+  id: ID!
+  name: String
+  version: String
+  authors: String
+  published: Int
+  publicationType: String
+  doi: String
+  preferred: Int
+
+  specie: Specie @relation(name: "NOMENCLATURE_SPECIE", direction: "OUT")
+  strain: Strain @relation(name: "PHENOTYPE_CATEGORY", direction: "OUT")
+}
+
+type RegionOther {
+  id: ID!
+  name: String
+  abbreviation: String
+  comments: String
+  originalRegionRecord: OriginalRegionRecord
+}
+
+type OriginalRegionRecord @relation(name: "ORIGINAL_REGION") {
+  from: RegionOther
+  to: Nomenclature
+  originalCoordinateMinAP: Float
+  originalCoordinateMaxAP: Float
+  originalCoordinateMinDV: Float
+  originalCoordinateMaxDV: Float
+  originalCoordinateMinML: Float
+  originalCoordinateMaxML: Float
+}
+
+type BamsRegion {
+  id: String
+  name: String
+  description: String
+
+  regionConnection: [RegionConnection]
+  regionMappings: [RegionRelation]
+}
+
+### Cell information
+
+type CellPhenotype {
+  id: ID!
+  name: String
+  ontology: String
+  category: CellPhenotypeCategory
+    @relation(name: "PHENOTYPE_CATEGORY", direction: "OUT")
+}
+
+type CellPhenotypeCategory {
+  id: ID!
+  name: String
+  phenotypes: CellPhenotype
+    @relation(name: "PHENOTYPE_CATEGORY", direction: "IN")
+}
+
+type CellDescription {
+  id: ID!
+  description: String
+  iri: String
+}
+
+type CellType {
+  id: ID!
+  name: String
+  ontology: String
+
+  description: CellDescription
+    @relation(name: "CELL_DESCRIPTION", direction: "OUT")
+  classMembership: CellClass
+    @relation(name: "CELL_CLASS_MEMBERSHIP", direction: "OUT")
+  observedInRegions: [BrainRegion]
+    @relation(name: "CELLS_IN_REGION", direction: "IN")
+  analyses: [Analysis] @relation(name: "CELL_TYPE_PUTATIVE", direction: "IN")
+  observedInSpecies: [Specie]
+    @cypher(
+      statement: """
+      MATCH (this)<-[:CELLS_IN_REGION]-(b:BrainRegion)-[:REGION_SPECIE]->(s:Specie) RETURN DISTINCT s
+      """
+    )
+  analysisIds: [String]
+    @cypher(
+      statement: """
+      MATCH (this)<-[:CELL_TYPE_PUTATIVE]-(b:Analysis) RETURN DISTINCT b.id
+      """
+    )
+}
+
+type CellClass {
+  id: ID!
+  name: String
+  ontology: String
+
+  description: CellDescription
+    @relation(name: "CELL_DESCRIPTION", direction: "OUT")
+  groupMembership: CellGroup
+    @relation(name: "CELL_GROUP_MEMBERSHIP", direction: "OUT")
+  cellTypesInClass: [CellType]
+    @relation(name: "CELL_CLASS_MEMBERSHIP", direction: "IN")
+}
+
+type CellGroup {
+  id: ID!
+  name: String
+  ontology: String
+
+  description: CellDescription
+    @relation(name: "CELL_DESCRIPTION", direction: "OUT")
+  cellClassesInGroup: [CellClass]
+    @relation(name: "CELL_GROUP_MEMBERSHIP", direction: "IN")
+}
+
+type NeuralStructure {
+  id: ID!
+  name: String
+  ontology: String
+}
+
+type CellularRegion {
+  id: ID!
+  name: String
+  ontology: String
+}
+
+## Subjects
+
+type Specimen {
+  id: ID!
+  name: String
+  form: String
+  order: String
+  specie: Specie @relation(name: "SPECIE", direction: "OUT")
+  strain: Strain @relation(name: "STRAIN", direction: "OUT")
+  substrain: Substrain @relation(name: "SUBSTRAIN", direction: "OUT")
+  transgenicLine: TransgenicLine
+    @relation(name: "TRANSGENIC_LINE", direction: "OUT")
+  sex: Sex @relation(name: "SEX", direction: "OUT")
+  ageCategory: AgeCategory @relation(name: "AGE_CATEGORY", direction: "OUT")
+}
+
+type Specie {
+  id: ID!
+  name: String
+  ontology: String
+  specimens: [Specimen] @relation(name: "SPECIE", direction: "IN")
+}
+
+type Strain {
+  id: ID!
+  name: String
+  ontology: String
+  substrains: [Substrain] @relation(name: "HAS_SUBSTRAIN", direction: "OUT")
+  comesFrom: Specie @relation(name: "FROM_SPECIE", direction: "OUT")
+}
+
+type Substrain {
+  id: ID!
+  name: String
+  ontology: String
+}
+
+type Sex {
+  id: ID!
+  name: String
+  ontology: String
+}
+
+type AgeCategory {
+  id: ID!
+  name: String
+  description: String
+  ontology: String
+  specie: Specie @relation(name: "FOR_SPECIE", direction: "OUT")
+}
+
+type TransgenicLine {
+  id: ID!
+  name: String
+  RRID: String
+}
+
+## Sources
+
+type Source {
+  id: ID!
+  title: String
+  type: String
+  insertedDate: String
+  publicationYear: Int
+  sourceName: String
+  rawDataAvailable: String
+  collectedFrom: SourceOrigin
+    @relation(name: "COLLECTED_FROM", direction: "OUT")
+}
+
+type SourceOrigin {
+  id: ID!
+  name: String
+  identifier: String
+  repositories: [Source] @relation(name: "COLLECTED_FROM", direction: "IN")
+}
+
+type ConsideredPaper {
+  id: ID!
+  title: String
+  publishedYear: Int
+  firstAuthor: String
+  #specie: String TODO Didnt manage to implement: Species
+  isIncluded: Boolean
+
+  publishedIn: SourceOrigin @relation(name: "COLLECTED_FROM", direction: "OUT")
+  exclustionReason: ExclusionReason
+    @relation(name: "EXCLUSION_REASON", direction: "OUT")
+  collectedFrom: SourceOrigin
+    @relation(name: "COLLECTED_FROM", direction: "OUT")
+}
+
+type ExclusionReason {
+  reason: String
+  papersExcludedWithReasion: [ConsideredPaper]
+    @relation(name: "EXCLUSION_REASON", direction: "IN")
+}
+
+## Experiments
+
+type Calculation {
+  id: ID!
+  description: String
+}
+
+type StereologyDetail {
+  id: ID!
+  name: String
+  probe: String
+  identificationFeature: String
+  disectorHeight: Int
+  areaSubfraction: Float
+  heightSubfraction: Float
+  investigatedSections: Float
+  investigatedFields: Int
+  countedObjects: Int
+  coefficientOfError: Float
+  estimatedVolume: Float
+  volumeUnit: String
+  anyExceptProbe: Int
+}
+
+type Distribution {
+  id: ID!
+  name: String
+  sectionSampling: String
+  samplingFraction: String
+  subsectionalSampling: String
+  finalEstimateBasis: String
+  distribution: String
+  distributionDimensions: String
+  analysisTypePrimary: String
+  analysisTypeSecondary: String
+
+  regionRecord: RegionRecord @relation(name: "REGION_RECORD", direction: "OUT")
+  cellularRegion: CellularRegion
+    @relation(name: "CELLULAR_REGION", direction: "OUT")
+  software: Software @relation(name: "PERFORMED_ON", direction: "OUT")
+  stereology: StereologyDetail @relation(name: "STEREOLOGY", direction: "OUT")
+  relatedQuantitation: Quantitation
+    @relation(name: "RELATED_TO", direction: "OUT")
+}
+
+type CellMorphology {
+  id: ID!
+  name: String
+  neuromorphoId: String ## TODI see if we can connect this to neuromorphe
+  somaSurface: Float
+  numberOfStems: Int
+  numberOfBifurcations: Int
+  numberOfBranches: Int
+  overallWidth: Float
+  overallHeight: Float
+  overallDepth: Float
+  averageBranchDiameter: Float
+  averageContraction: Float
+  totalArborLength: Float
+  totalArborSurface: Float
+  totalArborVolume: Float
+  maxEuclideanDistance: Float
+  maxPathDistance: Float
+  maxBranchOrder: Int
+  totalFragmentation: Int
+  partitionAsymmetry: Float
+  averageRalls: Int
+  averageBifurcationAngleLocal: Float
+  averageBifurcationAngleRemote: Float
+  fractalDimension: Float
+  physicalIntegrity: String
+  structuralDomains: String
+  morphologicalAttributes: String
+  originalFormat: String
+
+  regionRecord: RegionRecord @relation(name: "REGION_RECORD", direction: "OUT")
+  regionZone: RegionZone @relation(name: "REGION_ZONE", direction: "OUT")
+  reconstructionMethod: Software
+    @relation(name: "RECONSTRUCTED_WITH", direction: "OUT")
+}
+
+type Quantitation {
+  id: ID!
+  name: String
+  estimateRelevance: String
+  sectionSampling: String
+  samplingFraction: String
+  subsectionalSampling: String
+  finalEstimateBasis: String
+  originalExtent: String
+  number: Int
+  numberSD: Int
+  density: Float
+  densityUnit: String
+  densitySD: Int
+  volumetricDensity: Int
+  estimateExtraction: String
+
+  targetCellularRegion: CellularRegion
+    @relation(name: "CELLULAR_TARGET_REGION", direction: "OUT")
+  targetCell: CellType @relation(name: "TARGET_CELL", direction: "OUT")
+  regionRecord: RegionRecord @relation(name: "REGION_RECORD", direction: "OUT")
+  regionZone: RegionZone @relation(name: "REGION_ZONE", direction: "OUT")
+  software: Software @relation(name: "SOFTWARE", direction: "OUT")
+  stereology: StereologyDetail @relation(name: "STEREOLOGY", direction: "OUT")
+  relatedDistributions: [Distribution]
+    @relation(name: "RELATED_TO", direction: "IN")
+  calculations: [Calculation] @relation(name: "CALCULATION", direction: "OUT")
+}
+
+type DataType {
+  id: ID!
+  name: String
+  regionRecord: RegionRecord @relation(name: "REGION_RECORD", direction: "OUT")
+}
+
+type ObjectOfInterest @relation(name: "OBJECT_OF_INTEREST") {
+  from: Analysis
+  to: NeuralStructure
+  recognitionCriteria: String
+}
+
+type Analysis {
+  id: ID!
+  name: String
+  numberOfAnimals: Int
+  shrinkageConnection: String
+  dataType: String
+
+  experiment: Experiment @relation(name: "PART_OF_EXPERIMENT", direction: "OUT")
+  specimen: Specimen @relation(name: "SPECIMEN", direction: "OUT")
+  objectOfInterest: ObjectOfInterest
+  cellTypePutative: CellType
+    @relation(name: "CELL_TYPE_PUTATIVE", direction: "OUT")
+  visualizationMethod: VisualizationProtocol
+    @relation(name: "VISUALIZATION_METHOD", direction: "OUT")
+  sectioningDetail: SectioningDetail
+    @relation(name: "SECTIONING_DETAIL", direction: "OUT")
+  reporterIncubations: [ReporterIncubation]
+    @relation(name: "REPORTER_INCUBATION", direction: "OUT")
+
+  dataTypes: [DataType] @relation(name: "DATA_TYPE", direction: "OUT")
+  quantitations: [Quantitation] @relation(name: "DATA_TYPE", direction: "OUT")
+  cellMorphologies: [CellMorphology]
+    @relation(name: "DATA_TYPE", direction: "OUT")
+  distributions: [Distribution] @relation(name: "DATA_TYPE", direction: "OUT")
+
+  electronMicroscopes: [ElectronMicroscopeDetail]
+    @relation(name: "MICROSCOPE", direction: "OUT")
+  lightFluorescenceMicroscopes: [LightFluorescenceMicroscopeDetail]
+    @relation(name: "MICROSCOPE", direction: "OUT")
+  brainRegions: [BrainRegion]
+    @cypher(
+      statement: """
+      MATCH (b:BrainRegion)<-[:PRIMARY_REGION]-(r:RegionRecord)<-[:REGION_RECORD]-(d)<-[:DATA_TYPE]-(this)
+      RETURN DISTINCT b ORDER BY b.name
+      """
+    )
+}
+
+type Experiment {
+  id: ID!
+  name: String
+  animalStatus: String
+  ageLowerLimit: Int
+  ageUpperLimit: Int
+  weightLowerLimit: Int
+  weightUpperLimit: Int
+
+  source: Source @relation(name: "DATA_ORIGIN", direction: "OUT")
+  anaesthetic: Solution @relation(name: "ANAESTHETIC", direction: "OUT")
+  perfusionFixMedium: Solution
+    @relation(name: "PERFUSION_FIX_MEDIUM", direction: "OUT")
+  analyses: [Analysis] @relation(name: "PART_OF_EXPERIMENT", direction: "IN")
+  specimens: [Specimen] @relation(name: "EXPERIMENT_SPECIMEN", direction: "OUT")
+  brainRegions: [BrainRegion]
+    @cypher(
+      statement: """
+      MATCH (b:BrainRegion)<-[:PRIMARY_REGION]-(r:RegionRecord)<-[:REGION_RECORD]-(d)<-[:DATA_TYPE]-(:Analysis)-[:PART_OF_EXPERIMENT]->(this)
+      RETURN DISTINCT b ORDER BY b.name
+      """
+    )
+}
+
+type SectioningDetail {
+  sectionThickness: Float
+  sectionOrientation: String
+  sectioningInstrument: SectioningInstrument
+    @relation(name: "SECTIONED_BY", direction: "OUT")
+}
+
+type SectioningInstrument {
+  id: ID!
+  name: String
+}
+
+type ReporterIncubation {
+  id: ID!
+  order: String
+  concentration: String
+  time: Float
+  temperature: Int
+
+  reporter: Reporter @relation(name: "REPORTER", direction: "OUT")
+}
+
+type Reporter {
+  id: ID!
+  name: String
+  type: String
+  rrid: String
+  comment: String
+  originSpecie: String
+
+  target: ReporterTarget @relation(name: "TARGET", direction: "OUT")
+  label: ReporterLabel @relation(name: "LABEL", direction: "OUT")
+}
+
+type ReporterLabel {
+  id: ID!
+  name: String
+}
+
+type ReporterTarget {
+  id: ID!
+  phenotype: String
+}
+
+type VisualizationProtocol {
+  id: ID!
+  name: String
+  ontology: String
+}
+
+type Software {
+  id: ID!
+  name: String
+  rrid: String
+}
+
+type Solution {
+  id: ID!
+  name: String
+}
+
+type Microscope {
+  id: ID!
+  type: String
+  ontology: String
+}
+
+type ElectronMicroscopeDetail {
+  id: ID!
+  name: String
+  gridType: String
+  magnification: Int
+  microscope: Microscope @relation(name: "MICROSCOPE_TYPE", direction: "OUT")
+}
+
+type LightFluorescenceMicroscopeDetail {
+  id: ID!
+  name: String
+  mountingMedium: Int
+  refractionMedium: String
+  numericalAperature: Float
+  objectiveLens: String
+  totalMagnification: String
+  pixelSize: Float
+  z_stack: Boolean
+  opticalSliceSize: String
+  microscope: Microscope @relation(name: "MICROSCOPE_TYPE", direction: "OUT")
+}
+
+## Query and Mutations
+type Query {
+  brainRegionBySubstring(substring: String): [BrainRegion]
+    @cypher(
+      statement: "MATCH (x:BrainRegion) WHERE toLower(x.name) CONTAINS toLower($substring) RETURN x"
+    )
+
+  sourceBySubstring(substring: String): [Source]
+    @cypher(
+      statement: "MATCH (x:Source) WHERE toLower(x.name) CONTAINS toLower($substring) RETURN x"
+    )
+
+  cellTypesBySubstring(substring: String): [CellType]
+    @cypher(
+      statement: "MATCH (x:CellType) WHERE toLower(x.name) CONTAINS toLower($substring) RETURN x"
+    )
+
+  experimentById(id: String): Experiment
+    @cypher(statement: "MATCH (x:Experiment {id: $id}) RETURN x")
+}
