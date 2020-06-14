@@ -19,7 +19,7 @@ const app = express();
  */
 
 const schema = makeAugmentedSchema({
-  typeDefs
+  typeDefs,
 });
 
 /*
@@ -45,19 +45,19 @@ const server = new ApolloServer({
   context: { driver },
   schema: schema,
   introspection: true,
-  playground: true
+  playground: true,
 });
 
 // Specify port and path for GraphQL endpoint
-const port = process.env.GRAPHQL_LISTEN_PORT || 4001;
+const port = process.env.PORT || 4001;
 const path = "/graphql";
 
 /*
-* Optionally, apply Express middleware for authentication, etc
-* This also also allows us to specify a path for the GraphQL endpoint
-*/
-server.applyMiddleware({app, path});
+ * Optionally, apply Express middleware for authentication, etc
+ * This also also allows us to specify a path for the GraphQL endpoint
+ */
+server.applyMiddleware({ app, path });
 
-app.listen({port, path}, () => {
+app.listen({ port, path }, () => {
   console.log(`GraphQL server ready at http://localhost:${port}${path}`);
 });
