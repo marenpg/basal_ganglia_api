@@ -11,8 +11,7 @@
     "start": "npm run build && node build/index.js",
     "git:checkout-master-and-pull": "git checkout master && git pull --rebase",
     "deploy:prod": "npm run git:checkout-master-and-pull && git push heroku master",
-    "deploy": "git push heroku master",
-    "heroku-prebuild": "npm run build"
+    "deploy": "git push heroku master"
   },
   "author": "Maren Gulnes",
   "license": "MIT",
