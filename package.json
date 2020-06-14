@@ -12,8 +12,7 @@
     "git:checkout-master-and-pull": "git checkout master && git pull --rebase",
     "deploy:prod": "npm run git:checkout-master-and-pull && git push heroku master",
     "deploy": "git push heroku master",
-    "heroku-prebuild": "cross-env NODE_ENV=production && npm run build:component-lib",
-    "heroku-postbuild": "npm run build"
+    "heroku-prebuild": "npm run build"
   },
   "author": "Maren Gulnes",
   "license": "MIT",
