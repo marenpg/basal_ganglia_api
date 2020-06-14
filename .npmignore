@@ -1,2 +1,2 @@
 # .npmignore
-.env
+/node_modules
