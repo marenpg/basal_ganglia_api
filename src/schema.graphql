@@ -569,7 +569,6 @@ type ElectronMicroscopeDetail {
 type LightFluorescenceMicroscopeDetail {
   id: ID!
   name: String
-  mountingMedium: Int
   refractionMedium: String
   numericalAperature: Float
   objectiveLens: String
@@ -577,6 +576,8 @@ type LightFluorescenceMicroscopeDetail {
   pixelSize: Float
   z_stack: Boolean
   opticalSliceSize: String
+
+  mountingMedium: Solution @relation(name: "MOUNTING_MEDIUM", direction: "OUT")
   microscope: Microscope @relation(name: "MICROSCOPE_TYPE", direction: "OUT")
 }
 
