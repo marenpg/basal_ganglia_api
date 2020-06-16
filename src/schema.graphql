@@ -348,6 +348,7 @@ type Distribution {
     @relation(name: "CELLULAR_REGION", direction: "OUT")
   software: Software @relation(name: "PERFORMED_ON", direction: "OUT")
   stereology: StereologyDetail @relation(name: "STEREOLOGY", direction: "OUT")
+  analysis: Analysis @relation(name: "DATA_TYPE", direction: "IN")
   relatedQuantitation: Quantitation
     @relation(name: "RELATED_TO", direction: "OUT")
 }
@@ -415,6 +416,7 @@ type Quantitation {
   relatedDistributions: [Distribution]
     @relation(name: "RELATED_TO", direction: "IN")
   calculations: [Calculation] @relation(name: "CALCULATION", direction: "OUT")
+  analysis: Analysis @relation(name: "DATA_TYPE", direction: "IN")
 }
 
 type DataType {
