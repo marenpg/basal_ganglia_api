@@ -387,6 +387,14 @@ type CellMorphology {
   regionZone: RegionZone @relation(name: "REGION_ZONE", direction: "OUT")
   reconstructionMethod: Software
     @relation(name: "RECONSTRUCTED_WITH", direction: "OUT")
+  morphology: Neuromorpho @relation(name: "MORPHOLOGY", direction: "OUT")
+}
+
+type Neuromorpho {
+  id: ID!
+  href: String
+  base64: String
+  archive: String
 }
 
 type Quantitation {
