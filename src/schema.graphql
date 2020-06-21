@@ -406,11 +406,11 @@ type Quantitation {
   subsectionalSampling: String
   finalEstimateBasis: String
   originalExtent: String
-  number: Int
-  numberSD: Int
-  density: Float
+  number: String
+  numberSD: String
+  density: String
   densityUnit: String
-  densitySD: Int
+  densitySD: String
   volumetricDensity: Int
   estimateExtraction: String
 
