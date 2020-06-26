@@ -340,17 +340,23 @@ type Distribution {
   finalEstimateBasis: String
   distribution: String
   distributionDimensions: String
+
   analysisTypePrimary: String
   analysisTypeSecondary: String
 
+  cellularTargetRegion: CellularTargetRegion
   regionRecord: RegionRecord @relation(name: "REGION_RECORD", direction: "OUT")
-  cellularRegion: CellularRegion
-    @relation(name: "CELLULAR_REGION", direction: "OUT")
   software: Software @relation(name: "PERFORMED_ON", direction: "OUT")
   stereology: StereologyDetail @relation(name: "STEREOLOGY", direction: "OUT")
   analysis: Analysis @relation(name: "DATA_TYPE", direction: "IN")
   relatedQuantitation: Quantitation
     @relation(name: "RELATED_TO", direction: "OUT")
+}
+
+type CellularTargetRegion @relation(name: "CELLULAR_REGION") {
+  from: Distribution
+  to: CellularRegion
+  cytochemicalId: String
 }
 
 type CellMorphology {
