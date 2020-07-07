@@ -470,6 +470,7 @@ type Analysis {
     @relation(name: "DATA_TYPE", direction: "OUT")
   distributions: [Distribution] @relation(name: "DATA_TYPE", direction: "OUT")
 
+  similarAnalyses: [AnalysisSimilarity]
   electronMicroscopes: [ElectronMicroscopeDetail]
     @relation(name: "MICROSCOPE", direction: "OUT")
   lightFluorescenceMicroscopes: [LightFluorescenceMicroscopeDetail]
@@ -481,6 +482,12 @@ type Analysis {
       RETURN DISTINCT b ORDER BY b.name
       """
     )
+}
+
+type AnalysisSimilarity @relation(name: "SIMILARITY") {
+  from: Analysis
+  to: Analysis
+  score: Float
 }
 
 type Experiment {
