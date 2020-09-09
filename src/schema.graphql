@@ -452,18 +452,17 @@ type Analysis {
   shrinkageConnection: String
   dataType: String
 
+
   experiment: Experiment @relation(name: "PART_OF_EXPERIMENT", direction: "OUT")
   specimen: Specimen @relation(name: "SPECIMEN", direction: "OUT")
   objectOfInterest: ObjectOfInterest
+  sectioningDetail: SectioningDetail
+  reporterIncubations: [ReporterIncubation]
+
   cellTypePutative: CellType
     @relation(name: "CELL_TYPE_PUTATIVE", direction: "OUT")
   visualizationMethod: VisualizationProtocol
     @relation(name: "VISUALIZATION_METHOD", direction: "OUT")
-  sectioningDetail: SectioningDetail
-    @relation(name: "SECTIONING_DETAIL", direction: "OUT")
-  reporterIncubations: [ReporterIncubation]
-    @relation(name: "REPORTER_INCUBATION", direction: "OUT")
-
   dataTypes: [DataType] @relation(name: "DATA_TYPE", direction: "OUT")
   quantitations: [Quantitation] @relation(name: "DATA_TYPE", direction: "OUT")
   cellMorphologies: [CellMorphology]
@@ -514,11 +513,11 @@ type Experiment {
     )
 }
 
-type SectioningDetail {
+type SectioningDetail @relation(name: "SECTIONED_BY") {
+  from: Analysis
+  to: SectioningInstrument
   sectionThickness: Float
   sectionOrientation: String
-  sectioningInstrument: SectioningInstrument
-    @relation(name: "SECTIONED_BY", direction: "OUT")
 }
 
 type SectioningInstrument {
@@ -526,14 +525,13 @@ type SectioningInstrument {
   name: String
 }
 
-type ReporterIncubation {
-  id: ID!
+type ReporterIncubation @relation(name: "USED_REPORTER") {
+  from: Analysis
+  to: Reporter
   order: String
   concentration: String
-  time: Float
-  temperature: Int
-
-  reporter: Reporter @relation(name: "REPORTER", direction: "OUT")
+  time: String
+  temperature: String
 }
 
 type Reporter {
