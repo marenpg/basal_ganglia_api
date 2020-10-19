@@ -1,5 +1,8 @@
-# The API is based on the [GRANDstack Starter - GraphQL API](https://github.com/grand-stack/grand-stack-starter) 
+# Murine Basal Ganglia Web Solution - GraphQL API
 
+The API is based on the [GRANDstack Starter - GraphQL API](https://github.com/grand-stack/grand-stack-starter). For more information on the GRANDStack, visit https://grandstack.io/. This directory contains a GraphQL API of the murine basal ganglia graph database. The application connects with a Neo4j database instance.
+
+The API solution is deployed through [Heroku](https://www.heroku.com/) and is available at https://basal-ganglia-graphql.herokuapp.com/graphql.
 
 ## Quick Start
 
@@ -9,37 +12,15 @@ Install dependencies:
 npm install
 ```
 
-Start the GraphQL service:
+Start the GraphQL service in development mode:
 
 ```
-npm start
+npm run start-dev
 ```
 
 This will start the GraphQL service (by default on localhost:4000) where you can issue GraphQL requests or access GraphQL Playground in the browser:
 
 ## Configure
 
-Set your Neo4j connection string and credentials in `.env`. For example:
-
-*.env*
-
-```
-NEO4J_URI=bolt://localhost:7687
-NEO4J_USER=neo4j
-NEO4J_PASSWORD=letmein
-```
-
-Note that grand-stack-starter does not currently bundle a distribution of Neo4j. You can download [Neo4j Desktop](https://neo4j.com/download/) and run locally for development, spin up a [hosted Neo4j Sandbox instance](https://neo4j.com/download/), run Neo4j in one of the [many cloud options](https://neo4j.com/developer/guide-cloud-deployment/), or [spin up Neo4j in a Docker container](https://neo4j.com/developer/docker/). Just be sure to update the Neo4j connection string and credentials accordingly in `.env`.
-
-## Deployment
-
-You can deploy to any service that hosts Node.js apps, but [Zeit Now](https://zeit.co/now) is a great easy to use service for hosting your app that has an easy to use free plan for small projects. 
-
-To deploy your GraphQL service on Zeit Now, first install [Now Desktop](https://zeit.co/download) - you'll need to provide an email address. Then run
-
-```
-now
-```
-
-to deploy your GraphQL service on Zeit Now. Once deployed you'll be given a fresh URL that represents the current state of your application where you can access your GraphQL endpoint and GraphQL Playgound. For example: https://grand-stack-starter-api-pqdeodpvok.now.sh/
-
+Set your Neo4j connection string and credentials in `.env`.
+The application needs the follwing variables: The Neo4j database password: `NEO4J_PASSWORD`, The Neo4j database bolt URL: `NEO4J_URI`, and The Neo4j database username: `NEO4J_USER`.
