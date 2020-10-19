@@ -25,5 +25,5 @@ This will start the GraphQL service (by default on localhost:4000) where you can
 
 ## Configure
 
-Set the Neo4j connection string and credentials in `.env`.
+Configuration is done with environment variables specified in `.env`.
 The application needs the following variables: The Neo4j database password: `NEO4J_PASSWORD`, The Neo4j database bolt URL: `NEO4J_URI`, and The Neo4j database username: `NEO4J_USER`.
